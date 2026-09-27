@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Nothing can be loaded from or sent to any other website. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0070C0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Insulin Dose">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="stylesheet" href="style.css">
+  <title>Insulin Dose Calculator</title>
+</head>
+<body>
+  <button id="update-bar" class="update-bar" type="button" hidden>A new version is ready – tap here to reload</button>
+
+  <header class="app-header">
+    <h1>Insulin Dose Calculator</h1>
+  </header>
+
+  <main>
+    <!-- ======================= CALCULATOR ======================= -->
+    <section id="tab-calc" class="tab" aria-label="Calculator">
+
+      <div class="card">
+        <div class="label" id="meal-label">Meal Time</div>
+        <div id="meal-buttons" class="segmented" role="radiogroup" aria-labelledby="meal-label"></div>
+      </div>
+
+      <div class="glucose-grid">
+        <div id="reading-box" class="box box-reading">
+          <label class="label" for="reading">Blood Sugar Reading</label>
+          <input id="reading" class="reading-input" type="text" inputmode="numeric" pattern="[0-9]*"
+                 maxlength="4" autocomplete="off" autocorrect="off" spellcheck="false"
+                 enterkeyhint="done" placeholder="–">
+          <span class="unit">mg/dL</span>
+        </div>
+
+        <div id="arrow-box" class="box box-arrow">
+          <div class="label" id="arrow-label">Arrow <span class="hint">tap again to clear</span></div>
+          <div id="arrow-buttons" class="arrow-buttons" role="radiogroup" aria-labelledby="arrow-label"></div>
+        </div>
+
+        <div id="correction-box" class="box box-correction">
+          <div class="label" id="correction-label">Correction Dose</div>
+          <output id="correction" class="big-value" aria-labelledby="correction-label"></output>
+        </div>
+      </div>
+
+      <div id="message" class="banner" role="status" hidden></div>
+
+      <div class="card">
+        <h2 class="section-title">Carbohydrate Intake</h2>
+        <div class="food-grid food-head" aria-hidden="true">
+          <span>Food to Eat</span><span>Carbs (g)</span><span>Req’d. Dose</span>
+        </div>
+        <div id="food-rows"></div>
+      </div>
+
+      <div class="total-box">
+        <div class="total-label" id="total-label">Total Insulin to be injected to maintain acceptable Sugar level</div>
+        <output id="total" class="total-value" aria-labelledby="total-label" aria-live="polite"></output>
+      </div>
+
+      <p id="ketone-note" class="ketone-note" role="status" hidden></p>
+      <p id="reminder-line" class="reminder-line"></p>
+      <p class="disclaimer" data-disclaimer></p>
+
+      <button id="clear" class="clear-btn" type="button">Clear</button>
+    </section>
+
+    <!-- ======================= PLAN ======================= -->
+    <section id="tab-plan" class="tab" aria-label="Plan" hidden>
+      <h2 class="page-title">Plan</h2>
+      <div id="plan-content"></div>
+    </section>
+
+    <!-- ======================= INSTRUCTIONS ======================= -->
+    <section id="tab-help" class="tab" aria-label="Instructions" hidden>
+      <h2 class="page-title">Instructions</h2>
+
+      <section class="card">
+        <h3>How to use</h3>
+        <ol class="steps">
+          <li>Check the <strong>Meal Time</strong>. It is picked from the phone’s clock. Tap another one to change it.</li>
+          <li>Type the <strong>Blood Sugar Reading</strong> in mg/dL.</li>
+          <li>If the sensor shows a trend arrow, tap the matching <strong>Arrow</strong>. Tap it again to clear it.</li>
+          <li>Read the <strong>Correction Dose</strong> and the coloured message under it.</li>
+          <li>For each food, type its name and its carbs in grams. A row only counts when it has both.</li>
+          <li>The big box at the bottom shows the <strong>total insulin</strong>. It never goes below 0.</li>
+          <li>Check the numbers against the written plan before injecting.</li>
+          <li>Tap <strong>Clear</strong> when you are done. <span id="auto-clear-note"></span></li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h3>Reminders</h3>
+        <ul id="reminder-list" class="reminders"></ul>
+      </section>
+
+      <section class="card">
+        <h3>Privacy</h3>
+        <p>Nothing you type is saved or sent anywhere. There are no accounts or tracking. The numbers disappear when you tap Clear or close the app. After the first visit it works without internet.</p>
+      </section>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Sections">
+    <button type="button" data-tab="calc" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><rect x="8" y="5.5" width="8" height="4" rx="1"/><path d="M8.5 13h0M12 13h0M15.5 13h0M8.5 16.5h0M12 16.5h0M15.5 16.5h0"/></svg>
+      <span>Calculator</span>
+    </button>
+    <button type="button" data-tab="plan" aria-current="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M9.5 4v16"/></svg>
+      <span>Plan</span>
+    </button>
+    <button type="button" data-tab="help" aria-current="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6M12 7.5v.01"/></svg>
+      <span>Instructions</span>
+    </button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
