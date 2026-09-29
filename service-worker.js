@@ -6,7 +6,7 @@
  * That is how the phone knows to download the new files.
  */
 const CACHE_PREFIX = 'insulin-dose-calculator-';
-const CACHE_VERSION = CACHE_PREFIX + 'v1';
+const CACHE_VERSION = CACHE_PREFIX + 'v2';
 
 const APP_FILES = [
   './',
